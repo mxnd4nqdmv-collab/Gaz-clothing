@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gaz Clothing</title>
+
+<style>
+body { margin:0; font-family:Arial; background:#f8f8f8; }
+header { background:#111; color:#fff; padding:20px; text-align:center; }
+.products { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:20px; padding:40px; }
+.product { background:#fff; padding:20px; border-radius:10px; }
+button { background:#111; color:#fff; padding:10px; border:none; cursor:pointer; }
+
+.cart {
+  position:fixed;
+  right:0;
+  top:0;
+  width:300px;
+  height:100%;
+  background:#fff;
+  border-left:1px solid #ddd;
+  padding:20px;
+  overflow:auto;
+}
+
+.cart-item { margin-bottom:10px; }
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>GAZ CLOTHING</h1>
+</header>
+
+<div class="products">
+
+  <div class="product">
+    <h3>Grey Hoodie</h3>
+    <p>€59.99</p>
+    <select id="size1">
+      <option>S</option><option>M</option><option>L</option>
+    </select>
+    <button onclick="addToCart('Grey Hoodie', 5999, 'size1')">Add to Cart</button>
+  </div>
+
+  <div class="product">
+    <h3>Blue Jacket</h3>
+    <p>€79.99</p>
+    <select id="size2">
+      <option>S</option><option>M</option><option>L</option>
+    </select>
+    <button onclick="addToCart('Blue Jacket', 7999, 'size2')">Add to Cart</button>
+  </div>
+
+</div>
+
+<div class="cart">
+  <h2>Cart</h2>
+  <div id="cartItems"></div>
+  <h3 id="total"></h3>
+  <button onclick="checkout()">Checkout</button>
+</div>
+
+<script>
+let cart = [];
+
+function addToCart(name, price, sizeId) {
+  const size = document.getElementById(sizeId).value;
+  cart.push({ name, price, size });
+  renderCart();
+}
+
+function renderCart() {
+  const cartDiv = document.getElementById('cartItems');
+  cartDiv.innerHTML = '';
+
+  let total = 0;
+
+  cart.forEach(item => {
+    total += item.price;
+    cartDiv.innerHTML += `
+      <div class="cart-item">
+        ${item.name} (${item.size}) - €${(item.price/100).toFixed(2)}
+      </div>
+    `;
+  });
+
+  document.getElementById('total').innerText =
+    "Total: €" + (total/100).toFixed(2);
+}
+
+async function checkout() {
+  const res = await fetch('/checkout', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(cart)
+  });
+
+  const data = await res.json();
+  window.location = data.url;
+}
+</script>
+
+</body>
+</html>
